@@ -1,6 +1,6 @@
 myhome=ENV['HOME']
 myhome2='/fs4/saji'
-require "#{myhome2}/fortran-namelist/lib/nml.rb"
+require "#{myhome}/fortran-namelist/lib/nml.rb"
 
 infil = "../namelists/namelist.input.all_options"
 opfil = "../namelists/namelist.input.FNL_AAsia"
@@ -16,7 +16,17 @@ nml.delete(:grib2)
 nml[:time_control].del :run_days,
         :run_hours,
         :run_minutes,
-        :run_seconds
+        :run_seconds,        :auxinput4_inname,
+        :auxinput4_interval,
+        :io_form_auxinput4,
+        :auxinput11_interval_s,
+        :auxinput11_end_h,
+        :output_diagnostics,
+        :auxhist3_outname,
+        :io_form_auxhist3,
+        :auxhist3_interval,
+        :frames_per_auxhist3
+
 
 # modify largely unchanging records in each group
 # for the FNL AAsia experiment
@@ -47,7 +57,7 @@ g=nml[:domains]
   g[:min_time_step]            = 120
 
 nml[:physics].del :sst_update, :tmn_update, :sst_skin, :slope_rad,
-                 :topo_shading, :shadelen, :sf_urban_physics
+                 :topo_shading, :shadlen, :sf_urban_physics
 ph = nml[:physics]
   ph[:sf_sfclay_physics]       = 1
   ph[:sf_surface_physics]      = 2
@@ -65,6 +75,13 @@ ph = nml[:physics]
   ph[:cudt]                    = 10
 
 nml[:dfi_control][:dfi_time_dim] = 1000
+
+dy = nml[:dynamics]
+  dy[:rk_ord] = 3
+  dy[:time_step_sound] = 0
+  dy[:gwd_opt] = 1
+
+nml[:bdy_control][:spec_exp] = 0.33
 
 ofil = File.open(opfil,"w")
 nml_writer = NML_Writer.new
