@@ -11,13 +11,15 @@ wrf_bin       = sim_dirs["executable"]
 pre_dir       = sim_dirs["pre_process"]
 nam_lst       = sim_dirs["wrf_namelist"]
 mpi_opts      = {"-np" => 26}
+wrf_in = ["./work/wrfinput_d01","./work/wrfbdy_d01"]
 
-real = WRF_MPI_Real.new(run_dir, wrf_tbl, wrf_bin, pre_dir, nam_lst,mpi_opts)
-real.hostfile = "./wrf_hostfile"
-pp real.run_opts
-pp real.run_cmd
+wrf = WRF_MPI_Run.new(run_dir, wrf_tbl, wrf_bin, wrf_in, nam_lst,mpi_opts)
+wrf.hostfile = "./wrf_hostfile"
+pp wrf.run_opts
+pp wrf.run_cmd
 #real.run_cmd="sudo /home/saji/InfiniBand/bin/mpirun"
-pp real.run_cmd
-status= real.run
+pp wrf.run_cmd
+status= wrf.run
+p status
 exit
 pp real.clean if status

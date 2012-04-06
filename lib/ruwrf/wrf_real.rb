@@ -25,7 +25,7 @@ class WRF_Real
 
   def ln_met_files
     puts "Linking in met*nc files"
-    unln_met_files
+#    unln_met_files
     FileUtils.ln_s Dir.glob("#{@pre_dir}/met*.nc"), run_dir
   end
 
@@ -36,7 +36,7 @@ class WRF_Real
   def run
     FileUtils.mkdir run_dir unless File.exist? run_dir
     cp_wrf_tables
-    ln_met_files
+#    ln_met_files
     cp_namlst(@nam_lst,run_dir)
     run_real
   end

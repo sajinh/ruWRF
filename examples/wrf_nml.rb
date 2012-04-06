@@ -2,8 +2,8 @@ require 'yaml'
 require 'pp'
 myhome=ENV['HOME']
 myhome2='/fs4/saji'
-require "#{myhome}/fortran-namelist/lib/nml.rb"
-require "#{myhome}/ruWRF/lib/ruwrf.rb"
+require "#{myhome2}/fortran-namelist/lib/nml.rb"
+require "#{myhome2}/ruWRF/lib/ruwrf.rb"
 require './data/fnl_data'
 
 infil = "../namelists/namelist.input.FNL_AAsia"
@@ -49,12 +49,15 @@ shar[:interval_seconds]=lbc_upd_frq_in_hrs*secs_per_hr
 shar[:restart] = ".#{RESTART}." 
 shar[:restart_interval] = duration
 
+shar.del :no_colons, :nocolons
+
 dm =  nml[:domains]
   dm[:max_dom] = 1
   dm[:time_step] = 120
   dm.del  :tile_sz_x,:tile_sz_y,:numtiles,:nproc_x,:nproc_y
 
 
+nml[:physics][:num_land_cat] = 20
 df = nml[:dfi_control]
   df[:dfi_bckstop_year], df[:dfi_fwdstop_year] = dfi.map {|d| d.year}
   df[:dfi_bckstop_month], df[:dfi_fwdstop_month] = dfi.map {|d| d.mon}
@@ -68,4 +71,6 @@ nml_writer = NML_Writer.new
 nml_writer.okeys=nml[:okeys]
 nml_writer << nml 
 nml_writer >> outfil
+nml_writer >> STDOUT
+p opfil
 outfil.close
