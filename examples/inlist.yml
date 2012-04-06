@@ -1,0 +1,23 @@
+simulation:
+  last_batch?: false
+  ic_from_restart?: false
+  lbc_upd_frq_in_hrs: 6
+dates:    
+  syr: 2011
+  smo: 1
+  sdy: 1
+  shr: 0
+  eyr: 2011
+  emo: 1
+  edy: 5
+  ehr: 18
+directories:
+  executable:   /home/saji/WRF/bin/mpi/AMD/3.3.1
+  pre_process:  ./work
+  run:          ./work
+  vtable:       /home/saji/WRF/lib/wrf/VTables/Vtable.GFS
+  misc_tables:  /home/saji/WRF/lib/wrf/tables
+  wps_namelist: ./namelists/namelist.wps
+  wrf_namelist: ./namelists/namelist.input
+  lbc_data:     /fs1/matsuda/wrf/DATA/fnl/
+  lbc_list:    ./data/infiles.dat

@@ -1,0 +1,2 @@
+arc-env slots=4 max-slots=4
+gpgpu slots=22 max-slots=22

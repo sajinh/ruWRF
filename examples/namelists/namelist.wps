@@ -1,0 +1,49 @@
+&share
+ io_form_geogrid = 2,
+ start_hour = 0,
+ max_dom = 1,
+ end_year = 2011,
+ end_hour = 18,
+ interval_seconds = 21600,
+ start_month = 1,
+ start_minute = 0,
+ end_month = 1,
+ end_minute = 0,
+ start_day = 1,
+ start_second = 0,
+ end_day = 5,
+ wrf_core = 'ARW',
+ start_year = 2011,
+ end_second = 0,
+/
+
+&ungrib
+ out_format = 'WPS',
+ prefix = 'FILE',
+/
+
+&metgrid
+ fg_name = 'FILE',
+ io_form_metgrid = 2,
+ opt_metgrid_tbl_path = '/home/saji/WRF/share/wrf/metgrid',
+/
+
+&geogrid
+ parent_grid_ratio = 1,3,3,
+ j_parent_start = 1,70,134,
+ dy = 54000,
+ e_sn = 220,214,214,
+ dx = 54000,
+ map_proj = 'mercator',
+ ref_lon = 110,
+ stand_lon = 110,
+ parent_id = 1,1,1,
+ truelat1 = 0,
+ e_we = 378,751,214,
+ geog_data_res = 'modis_30s+10m','modis_30s+2m','modis_30s+30s',
+ i_parent_start = 1,24,202,
+ ref_lat = 0,
+ geog_data_path = '/home/saji/WRF/share/geog',
+ truelat2 = 0,
+ opt_geogrid_tbl_path = '/home/saji/WRF/share/wrf/geogrid',
+/

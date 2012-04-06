@@ -1,0 +1,8 @@
+smooth_cg_topo = .true. ; smooth dom1 topo at domain edges
+
+io_form_restart = 102 ; to split the restart files among processors
+                      ; however one should restart with the same no of
+                      ; processers as original run
+
+analysis nudging is set using variables in group &fdda
+observation nudging is also set using variables in group &fdda
