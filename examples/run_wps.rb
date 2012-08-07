@@ -28,9 +28,8 @@ pp pre.run_opts
 pp pre.run_cmd
 pp ung.run_cmd
 pp pre.setup
-#pp gstate=(pre.run_exe "geogrid")
+pp gstate=(pre.run_exe "geogrid")
 pp ustate=(ung.run_exe "ungrib")
 pp pre.clean
-gstate=true
 pp mstate=(pre.run_exe "metgrid") if gstate and ustate
 

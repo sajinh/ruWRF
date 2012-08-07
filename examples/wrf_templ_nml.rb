@@ -1,6 +1,6 @@
 myhome=ENV['HOME']
 myhome2='/fs4/saji'
-require "#{myhome}/fortran-namelist/lib/nml.rb"
+require "#{myhome2}/fortran-namelist/lib/nml.rb"
 
 infil = "../namelists/namelist.input.all_options"
 opfil = "../namelists/namelist.input.FNL_AAsia"
@@ -20,14 +20,11 @@ nml[:time_control].del :run_days,
         :auxinput4_interval,
         :io_form_auxinput4,
         :auxinput11_interval_s,
-        :auxinput11_end_h,
-        :output_diagnostics,
-        :auxhist3_outname,
-        :io_form_auxhist3,
-        :auxhist3_interval,
-        :frames_per_auxhist3
+        :auxinput11_end_h
 
-
+tc=nml[:time_control]
+  tc[:history_interval] = 1440  # every 24 hrs
+  tc[:frames_per_outfile]= 1
 # modify largely unchanging records in each group
 # for the FNL AAsia experiment
 
@@ -60,7 +57,7 @@ nml[:physics].del :sst_update, :tmn_update, :sst_skin, :slope_rad,
                  :topo_shading, :shadlen, :sf_urban_physics
 ph = nml[:physics]
   ph[:sf_sfclay_physics]       = 1
-  ph[:sf_surface_physics]      = 2
+  ph[:sf_surface_physics]      = 1
   ph[:bl_pbl_physics]          = 1
   ph[:bldt]                    = 0
   ph[:mp_physics]              = 6

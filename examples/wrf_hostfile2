@@ -1,0 +1,5 @@
+arc-env slots=4 max-slots=4
+node01 slots=10 max-slots=10
+node02 slots=10 max-slots=10
+node03 slots=10 max-slots=10
+gpgpu slots=22 max-slots=22

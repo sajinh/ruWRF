@@ -25,7 +25,11 @@ class WRF_Pre
     FileUtils.rm Dir.glob("#{lnkdir}/GRIBFILE.A*")
   end
 
-  def mklinks(files,lnkdir)
+  def lnkdir
+    @run_dir
+  end
+
+  def mklinks  #(files,lnkdir)
     rmlinks(lnkdir)
     lnk="AAA"
     files.each do |file|
@@ -38,12 +42,19 @@ class WRF_Pre
     FileUtils.ln_s @vtable, "#{run_dir}/Vtable", :force=>true 
   end
 
+  def mk_work_dir
+    FileUtils.mkdir run_dir unless File.exist? run_dir
+  end
+
+  def copy_namelists
+    cp_namlst(@nam_lst,run_dir)
+  end
 
   def setup
-    FileUtils.mkdir run_dir unless File.exist? run_dir
+    mk_work_dir
     ln_vtable
-    cp_namlst(@nam_lst,run_dir)
-    mklinks(files,run_dir)
+    copy_namelists
+    mklinks #(files,run_dir)
   end
 
   def clean
@@ -74,3 +85,4 @@ class WRF_MPI_Pre < WRF_Pre
   end
 
 end
+
