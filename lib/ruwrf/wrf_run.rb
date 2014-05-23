@@ -5,15 +5,15 @@ class WRF_Run
   include WRF_Common
   attr_accessor :run_dir, :wrf_bin
   attr_accessor :nam_lst, :wrf_in
-  attr_accessor :run_opts, :run_cmd
+  attr_accessor :mpi_opts, :run_cmd
   attr_reader :wrf_tbl
-  def initialize(run_dir, wrf_tbl, wrf_bin, wrf_in, nam_lst, opts={})
+  def initialize(run_dir, wrf_bin, wrf_in, wrf_tbl, nam_lst, opts={})
     @run_dir=File.expand_path run_dir
     @wrf_bin=File.expand_path wrf_bin
-    @wrf_tbl=File.expand_path wrf_tbl
     @wrf_in=wrf_in.map {|f| File.expand_path f}
+    @wrf_tbl=File.expand_path wrf_tbl
     @nam_lst=File.expand_path nam_lst
-    @opts=opts
+    @mpi_opts=opts
     @run_cmd=""
   end
 
@@ -22,9 +22,9 @@ class WRF_Run
     {}
   end
 
-  def run_opts
-    def_opts.merge @opts
-  end
+  ;def run_opts
+  ;  def_opts.merge @mpi_opts
+  ;end
  
   def cp_wrf_tables
     puts "Copying WRF Tables unless they are absent"
@@ -52,7 +52,7 @@ class WRF_Run
   end
 
   def run_directives
-    run_opts.to_a.join " "
+    run_opts.to_a.flatten.join " "
   end
 
   def run
@@ -60,10 +60,10 @@ class WRF_Run
     cp_input_data(wrf_in)
     cp_wrf_tables
     cp_namlst(@nam_lst,run_dir)
-    mpi_opts = run_directives
+    opts = run_directives
     Dir.chdir(run_dir) do
       FileUtils.rm Dir.glob("rsl.*")
-      system("#{run_cmd} #{mpi_opts} #{wrf_bin}/wrf.exe".strip)
+      system("#{run_cmd} #{opts} #{wrf_bin}/wrf.exe".strip)
     end
   end
 
@@ -91,7 +91,11 @@ class WRF_MPI_Run < WRF_Run
 end
 
 class WRF_MPI_IB_Run < WRF_MPI_Run
-  def def_opts
+ def def_opts
+    { "--mca"=> " btl openib,self,sm --mca btl_openib_cpc_include rdmacm --bind-to-core",
+      "-np" => 1}
+  end
+  def ext_opts
     { "--mca"=> "btl_openib_verbose 1 --mca btl ^tcp --bind-to-core",
       "-np" => 1}
   end

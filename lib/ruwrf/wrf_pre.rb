@@ -4,15 +4,15 @@ require 'fileutils'
 class WRF_Pre
   include WRF_Common
   attr_reader :run_dir, :wrf_bin
-  attr_accessor :run_cmd
+  attr_accessor :run_cmd, :mpi_opts
   def initialize(run_dir,wrf_bin, input_files, vtable, nam_lst,opts={})
     @run_dir     = File.expand_path run_dir
     @wrf_bin     = File.expand_path wrf_bin
     @input_files = input_files
-    @nam_lst     = File.expand_path nam_lst
     @vtable      = File.expand_path vtable
+    @nam_lst     = File.expand_path nam_lst
+    @mpi_opts    = mpi_opts
     @run_cmd     = ""
-    @opts        = opts
   end
 
   def files
@@ -78,11 +78,29 @@ class WRF_MPI_Pre < WRF_Pre
   end
 
   def run_exe(prog_name)
-    mpi_opts = run_opts.to_a.join " "
+    opts = run_opts.to_a.flatten.join " "
     Dir.chdir(run_dir) do
-      run_nice("#{run_cmd} #{mpi_opts} #{wrf_bin}/#{prog_name}.exe".strip)
+      run_nice("#{run_cmd} #{opts} #{wrf_bin}/#{prog_name}.exe".strip)
     end
   end
+end
+
+class WRF_MPI_IB_Pre < WRF_MPI_Pre
+  def def_opts
+    { "--mca"=> " btl openib,self,sm --mca btl_openib_cpc_include rdmacm --bind-to-core",
+      "-np" => 1}
+  end
+  def ext_opts
+    { "--mca"=> "btl_openib_verbose 1 --mca btl ^tcp --bind-to-core",
+      "-np" => 1}
+  end
+
 
 end
 
+class WRF_MPI_Eth_Pre < WRF_MPI_Pre
+  def def_opts
+    { "--mca"=> "btl ^openib --mca btl_tcp_if_include eth0 ",
+      "-np" => 1}
+  end
+end

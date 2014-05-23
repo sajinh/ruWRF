@@ -43,7 +43,7 @@ end
 class Command
   def self.run(cmd)
  output=""
-  p cmd
+  pp cmd
   pipe=IO.popen("#{cmd} 2>&1","w+")
   if pipe
     while !pipe.eof? do

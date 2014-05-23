@@ -1,0 +1,121 @@
+require File.join(File.dirname(__FILE__), 'wrf_configuration')
+
+class RunWPS
+  attr_accessor :mpi_opts
+  def initialize(inlist)
+    @conf = WRFConfiguration.new(inlist)
+    @mpi_opts = {"-np" => 1}
+  end
+  
+  def ungrib
+    Ungrib.new(@conf,mpi_opts)
+  end
+
+  def geogrid
+    GeoMetgrid.new(@conf,mpi_opts,run_cmd="geogrid")
+  end
+
+  def metgrid
+    GeoMetgrid.new(@conf,mpi_opts,run_cmd="metgrid")
+  end
+end
+
+module PreCommon
+  def setup(flag,mpiflag=false)
+    infiles = (flag ? lbc_files : nil)
+    return mpi_setup(infiles) if mpiflag
+    WRF_Pre.new(    
+                conf.pre_path,     # preprocess directory
+                conf.bin_path,     # executable directory
+                infiles,          # unused for now
+                conf.vtable,       # which vtable to use
+                conf.wps_namelist, # location of namelist.wps
+                mpi_opts           # mpi options 
+                )
+
+  
+  end
+  def mpi_setup(infiles)
+    WRF_MPI_Pre.new(    
+                conf.pre_path,     # preprocess directory
+                conf.bin_path,     # executable directory
+                infiles,          # unused for now
+                conf.vtable,       # which vtable to use
+                conf.wps_namelist, # location of namelist.wps
+                mpi_opts           # mpi options 
+                )
+  end
+end
+
+class Ungrib
+  include PreCommon
+  attr_reader :conf, :mpi_opts
+  def initialize(conf,mpi_opts)
+    @conf = conf
+    @ustate = false
+    @ung = setup(true)
+    @mpi_opts = mpi_opts
+  end
+
+  def run
+    all_present   = lbc_files.all? {|f| File.exist? f}
+    abort "Some input files are not present; eXit" unless all_present
+    puts "Proceeding to Ungribbing step"
+    @ung.setup
+    @ustate=(@ung.run_exe "ungrib")
+    self
+  end
+  
+  def cleanup
+    p "to clean or not to"
+    @ung.clean if @ustate
+    "not " if not @ustate
+  end
+
+private
+
+  def lbc_files
+    path     = conf.lbc_path
+    files   = IO.readlines(conf.lbc_files)
+    files.map! {|f| File.join path, f.chomp}
+  end
+end
+
+class GeoMetgrid
+  include PreCommon
+  attr_reader :conf, :mpi_opts
+  def initialize(conf,mpi_opts,run_cmd)
+    @conf = conf
+    @gstate = false
+    @mpi_opts = mpi_opts
+    @run_cmd = run_cmd
+    @geomet = setup(false,true)
+  end
+
+  def mpi_opts=(arg)
+    @geomet.opts=arg
+  end
+
+  def run
+    puts "Now running "+@run_cmd
+    @geomet.mk_work_dir
+    @geomet.copy_namelists
+    @gmstate=(@geomet.run_exe @run_cmd)
+    self
+  end
+
+  def method_missing(name,*args)
+    case name.to_s
+      when /hostfile|run_cmd|run_opts/
+        @geomet.send(name, *args)
+    else
+      abort "#{name}(#{args}) is not a valid command"
+    end 
+  end
+
+  def cleanup
+    p "to clean or not to"
+    @geomet.clean if @gmstate
+    "not " if not @gmstate
+  end
+end

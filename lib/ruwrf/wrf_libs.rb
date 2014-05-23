@@ -3,6 +3,7 @@ require File.join(File.dirname(__FILE__), 'helpers')
 module WRF_Common
 
   def run_nice(cmd)
+    pp "The system is executing the following command", cmd
     begin
         run_command(cmd)
     rescue
@@ -36,6 +37,6 @@ module MPI_Run
   end
 
   def run_opts
-    def_opts.merge(@opts).merge(hostfile).merge(rankfile)
+    def_opts.merge(@mpi_opts).merge(hostfile).merge(rankfile)
   end
 end

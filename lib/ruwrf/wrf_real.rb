@@ -4,14 +4,14 @@ require 'fileutils'
 class WRF_Real
   include WRF_Common
   attr_reader :run_dir, :wrf_tbl, :wrf_bin
-  attr_accessor :run_cmd
-  def initialize(run_dir,wrf_tbl,wrf_bin, pre_dir, nam_lst,opts={})
+  attr_accessor :run_cmd, :mpi_opts
+  def initialize(run_dir, wrf_bin, pre_dir, wrf_tbl, nam_lst,opts={})
     @run_dir=File.expand_path run_dir
     @wrf_bin=File.expand_path wrf_bin
-    @wrf_tbl=File.expand_path wrf_tbl
     @pre_dir=File.expand_path pre_dir
+    @wrf_tbl=File.expand_path wrf_tbl
     @nam_lst=File.expand_path nam_lst
-    @opts = opts
+    @mpi_opts = opts
     @run_cmd=""
   end
 
@@ -39,8 +39,8 @@ class WRF_Real
   def run
     FileUtils.mkdir run_dir unless File.exist? run_dir
     cp_wrf_tables
-    unln_met_files
-    ln_met_files
+    #unln_met_files
+    #ln_met_files
     copy_namelist
     run_real
   end
@@ -52,7 +52,8 @@ class WRF_Real
   end
 
   def clean
-    unln_met_files
+    FileUtils.mv "rsl.out.0000", "metgrid.log" if File.exist? "rsl.out.0000"
+    #unln_met_files
     rm_rsl_logs
   end
 
@@ -70,15 +71,26 @@ class WRF_MPI_Real < WRF_Real
   end
 
   def run_real
-    mpi_opts = run_opts.to_a.join " "
+    opts = run_opts.to_a.flatten.join " "
     Dir.chdir(run_dir) do
-      run_nice("#{run_cmd} #{mpi_opts} #{wrf_bin}/real.exe".strip)
+      run_nice("#{run_cmd} #{opts} #{wrf_bin}/real.exe".strip)
     end
   end
 end
 class WRF_MPI_IB_Real < WRF_MPI_Real
-  def def_opts
+ def def_opts
+    { "--mca"=> " btl openib,self,sm --mca btl_openib_cpc_include rdmacm --bind-to-core",
+      "-np" => 1}
+  end
+  def ext_opts
     { "--mca"=> "btl_openib_verbose 1 --mca btl ^tcp --bind-to-core",
+      "-np" => 1}
+  end
+end
+
+class WRF_MPI_Eth_Real < WRF_MPI_Real
+  def def_opts
+    { "--mca"=> "btl ^openib --mca btl_tcp_if_include eth0 ",
       "-np" => 1}
   end
 end
